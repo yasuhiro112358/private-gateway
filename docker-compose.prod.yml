@@ -1,0 +1,32 @@
+# Production override: pin Traefik to the current latest stable as of 2025-08-09
+services:
+  traefik:
+    image: traefik:v3.5.0
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./traefik.prod.yml:/etc/traefik/traefik.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - letsencrypt:/letsencrypt
+    environment:
+      - TRAEFIK_API_INSECURE=false
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.newtralize.com`)"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.dashboard.service=api@internal"
+    networks:
+      - traefik
+
+volumes:
+  letsencrypt:
+    name: letsencrypt
+
+networks:
+  traefik:
+    external: true
+    name: traefik
