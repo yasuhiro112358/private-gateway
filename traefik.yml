@@ -1,0 +1,36 @@
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+api:
+  dashboard: true
+  insecure: true  # 本番環境では false にして適切な認証を設定してください
+
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+    network: traefik
+  file:
+    directory: /etc/traefik/dynamic
+    watch: true
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: your-email@example.com  # あなたのメールアドレスに変更してください
+      storage: acme.json
+      httpChallenge:
+        entryPoint: web
+
+# ログレベル（本番環境では ERROR に変更することを推奨）
+log:
+  level: INFO
+
+accessLog: {}

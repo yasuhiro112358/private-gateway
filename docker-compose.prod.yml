@@ -1,0 +1,4 @@
+# Production override: pin Traefik to the current latest stable as of 2025-08-09
+services:
+  traefik:
+    image: traefik:v3.5.0

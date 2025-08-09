@@ -1,0 +1,21 @@
+# 動的設定ファイル
+# 必要に応じて、ここに追加のルートやミドルウェアを定義できます
+
+http:
+  middlewares:
+    # セキュリティヘッダーの例
+    secure-headers:
+      headers:
+        accessControlAllowMethods:
+          - GET
+          - OPTIONS
+          - PUT
+        accessControlMaxAge: 100
+        hostsProxyHeaders:
+          - "X-Forwarded-Host"
+        referrerPolicy: "same-origin"
+        sslRedirect: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 31536000
