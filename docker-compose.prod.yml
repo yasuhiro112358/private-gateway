@@ -2,3 +2,4 @@
 services:
   traefik:
     image: traefik:v3.5.0
+    restart: unless-stopped
