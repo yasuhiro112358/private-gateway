@@ -11,7 +11,7 @@
 
 開発（ローカル）
 1) プロジェクト直下で起動
-   - docker compose up -d
+   - docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 2) 動作確認
    - ダッシュボード: http://localhost:8080
    - 80番はバックエンド未登録なら404で正常
@@ -27,6 +27,11 @@
 3) 共有ネットワークとボリュームの作成（初回のみ）
    - docker network create traefik
    - docker volume create letsencrypt
+   3-確認) 作成確認（存在をチェック）
+   - docker network ls | grep -w traefik
+   - docker network inspect traefik | head -n 20
+   - docker volume ls | grep -w letsencrypt
+   - docker volume inspect letsencrypt | head -n 20
 4) DNS と FW を確認
    - traefik.newtralize.com の A/AAAA がサーバーIPを指す
    - 80/443 が外部から到達可能
@@ -38,7 +43,7 @@
    - docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
    - docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 3) 証明書/稼働確認
-   - docker logs -f traefik（ACME 取得ログを確認）
+   - docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f traefik  # ACME 取得ログを確認
    - https://traefik.newtralize.com にアクセス
 4) メンテ終了
    - 既存 Nginx に戻さない場合、そのまま運用
@@ -53,6 +58,18 @@
 1) 過去のコミット/タグへ移動: git checkout <commit or tag>
 2) 同じ compose コマンドで起動: up -d
 3) 最新に戻す: git checkout develop（または main）
+
+Nginx 復旧手順（ロールバック/緊急時）
+1) Traefik を停止してポート80/443を開放
+   - docker compose -f docker-compose.yml -f docker-compose.prod.yml down
+2) Nginx 設定の健全性チェック（任意）
+   - sudo nginx -t
+3) Nginx を起動（または再起動）
+   - 起動: sudo systemctl start nginx
+   - 再起動: sudo systemctl restart nginx
+4) 状態確認/再読み込み（任意）
+   - 状態: sudo systemctl status nginx --no-pager
+   - 設定反映のみ: sudo systemctl reload nginx
 
 別スタック（例: phpMyAdmin）を Traefik 経由で公開する
 - 別リポ側の Compose で、共有ネットワーク "traefik"（external）に参加させる
