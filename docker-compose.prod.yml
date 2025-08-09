@@ -24,6 +24,7 @@ services:
 
 volumes:
   letsencrypt:
+    external: true
     name: letsencrypt
 
 networks:
