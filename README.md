@@ -71,6 +71,22 @@ Nginx 復旧手順（ロールバック/緊急時）
    - 状態: sudo systemctl status nginx --no-pager
    - 設定反映のみ: sudo systemctl reload nginx
 
+ダッシュボード（本番）への安全なアクセス（SSH トンネル）
+- 設計: ダッシュボード用 entryPoint は admin(:9000)。127.0.0.1 にのみバインドされており、外部からはアクセス不可。
+- 閲覧手順（macOS などクライアント側で実行）
+  1) SSH トンネル開始:
+     - ssh -N -L 9000:127.0.0.1:9000 <user>@<server>
+     - 例: ssh -N -L 9000:127.0.0.1:9000 root@162.43.44.180
+     - ローカルの 9000 が使用中の場合: ssh -N -L 9001:127.0.0.1:9000 <user>@<server>
+  2) ブラウザでアクセス:
+     - http://localhost:9000/dashboard/（または 9001 を使った場合は http://localhost:9001/dashboard/）
+- API の注意:
+  - /api/ の直下は 404 が正常です。/api/version や /api/entrypoints、/api/http/routers、/api/rawdata で確認してください。
+- その他の注意:
+  - admin(9000) は HTTP です。https://localhost:9000 は使用しません。
+  - curl -I（HEAD）は 405 になることがあります。ブラウザまたは通常の GET で確認してください。
+  - 設定変更（traefik.prod.yml）はコンテナ再起動/再作成で反映されます。
+
 別スタック（例: phpMyAdmin）を Traefik 経由で公開する
 - 別リポ側の Compose で、共有ネットワーク "traefik"（external）に参加させる
 - 対象サービスに Traefik 用のラベルを付与してルーティングを定義（例: PathPrefix による /pma 公開）
@@ -78,7 +94,7 @@ Nginx 復旧手順（ロールバック/緊急時）
 - 具体的なラベルやルールは別リポ側で管理
 
 運用上の注意
-- ダッシュボードは本番で公開されます（現状は無保護）。後で認証やIP制限等の保護を追加することを強く推奨
+- ダッシュボードは本番では一般公開していません。admin(:9000) を 127.0.0.1 にのみバインドし、SSH トンネル経由での閲覧のみ許可しています。
 - 証明書ストレージは Docker の名前付きボリューム letsencrypt に保存（手動作成不要）
 - DNS 伝播や FW 設定でアクセスに時間がかかる場合があります
 
