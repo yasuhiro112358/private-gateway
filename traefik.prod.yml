@@ -17,6 +17,8 @@ entryPoints:
           permanent: true
   websecure:
     address: ":443"
+  admin:
+    address: ":9000"
 
 providers:
   docker:
